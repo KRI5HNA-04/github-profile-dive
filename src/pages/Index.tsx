@@ -147,8 +147,8 @@ const Index = () => {
               </Button>
             </form>
             
-            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-              <div className="text-muted-foreground text-sm flex flex-col items-center">
+            <div className="flex items-center justify-center w-full mt-auto">
+              <div className="text-muted-foreground text-sm flex flex-col items-center animate-bounce">
                 <span>Scroll to explore</span>
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
