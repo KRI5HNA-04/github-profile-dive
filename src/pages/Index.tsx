@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Github, Search, Code, GitBranch, Users, ArrowRight, Star } from "lucide-react";
 import Header from "@/components/Header";
@@ -10,6 +10,51 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
   const navigate = useNavigate();
+  
+  // Refs for sections we want to observe
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const reposRef = useRef<HTMLDivElement>(null);
+  
+  // State to track visibility
+  const [featuresVisible, setFeaturesVisible] = useState(false);
+  const [reposVisible, setReposVisible] = useState(false);
+
+  // Set up Intersection Observer on component mount
+  useEffect(() => {
+    const featuresObserver = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          setFeaturesVisible(true);
+          // Once visible, no need to observe anymore
+          if (featuresRef.current) featuresObserver.unobserve(featuresRef.current);
+        }
+      },
+      { threshold: 0.1 } // Trigger when 10% of the element is visible
+    );
+
+    const reposObserver = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          setReposVisible(true);
+          // Once visible, no need to observe anymore
+          if (reposRef.current) reposObserver.unobserve(reposRef.current);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    // Start observing
+    if (featuresRef.current) featuresObserver.observe(featuresRef.current);
+    if (reposRef.current) reposObserver.observe(reposRef.current);
+
+    // Cleanup
+    return () => {
+      if (featuresRef.current) featuresObserver.unobserve(featuresRef.current);
+      if (reposRef.current) reposObserver.unobserve(reposRef.current);
+    };
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +93,7 @@ const Index = () => {
       
       <main className="flex-grow flex flex-col">
         {/* Hero Section */}
-        <div className="relative w-full bg-gradient-to-b from-primary/5 to-background pt-32 pb-20 px-6">
+        <div className="relative w-full bg-gradient-to-b from-primary/5 to-background pt-32 pb-20 px-6 min-h-screen flex items-center">
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute left-1/2 top-0 -translate-x-1/2 blur-3xl opacity-20 pointer-events-none">
               <svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -101,20 +146,53 @@ const Index = () => {
                 <Search className="w-5 h-5" />
               </Button>
             </form>
+            
+            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+              <div className="text-muted-foreground text-sm flex flex-col items-center">
+                <span>Scroll to explore</span>
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="mt-2"
+                >
+                  <path d="M12 5v14"></path>
+                  <path d="M19 12l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
         
         {/* Features Section */}
-        <div className="py-20 px-6">
+        <div 
+          ref={featuresRef} 
+          className={cn(
+            "py-20 px-6 transition-all duration-1000",
+            featuresVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          )}
+        >
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-16">Powerful Features</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full animate-fade-in delay-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
               {features.map((feature, index) => (
                 <div 
                   key={index} 
-                  className="glass-card flex flex-col items-center text-center p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                  style={{ animationDelay: `${300 + index * 100}ms` }}
+                  className={cn(
+                    "glass-card flex flex-col items-center text-center p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300",
+                    featuresVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10",
+                    featuresVisible && `transition-delay-${index * 150}ms`
+                  )}
+                  style={{ 
+                    transitionDelay: featuresVisible ? `${index * 150}ms` : "0ms" 
+                  }}
                 >
                   <div className="p-4 rounded-full bg-primary/10 text-primary mb-6">
                     {feature.icon}
@@ -128,7 +206,13 @@ const Index = () => {
         </div>
         
         {/* Example Repositories Section */}
-        <div className="py-20 px-6 bg-primary/5">
+        <div 
+          ref={reposRef} 
+          className={cn(
+            "py-20 px-6 bg-primary/5 transition-all duration-1000",
+            reposVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          )}
+        >
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-6">Popular Repositories</h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -137,7 +221,16 @@ const Index = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {exampleRepos.map((repo, index) => (
-                <div key={index} className="bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-md transition-all duration-300">
+                <div 
+                  key={index} 
+                  className={cn(
+                    "bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-md transition-all duration-300",
+                    reposVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  )}
+                  style={{ 
+                    transitionDelay: reposVisible ? `${index * 150}ms` : "0ms" 
+                  }}
+                >
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="font-semibold text-lg">{repo.name}</h3>

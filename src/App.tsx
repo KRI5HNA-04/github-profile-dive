@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
 });
 
 const App = () => (
-  <ThemeProvider defaultTheme="system" storageKey="github-insights-theme">
+  <ThemeProvider defaultTheme="light" storageKey="github-insights-theme">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
