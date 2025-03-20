@@ -118,7 +118,9 @@ export default {
 			},
 			boxShadow: {
 				'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
-				'hover': '0 10px 30px -5px rgba(0, 0, 0, 0.1)'
+				'hover': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+				'neumorph': '20px 20px 60px #d9d9d9, -20px -20px 60px #ffffff',
+				'neumorph-dark': '20px 20px 60px #1a1a1a, -20px -20px 60px #262626',
 			}
 		}
 	},
